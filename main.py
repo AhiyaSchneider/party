@@ -82,7 +82,7 @@ if "PORT" in os.environ:  # Render requires a port
         listen="0.0.0.0",
         port=PORT,
         url_path=TOKEN,
-        webhook_url=f"https://your-render-url.com/{TOKEN}"  # Replace with your actual Render URL
+        webhook_url=f"https://api.render.com/deploy/srv-cuovqktsvqrc73et5dmg?key=CgqgW44sz1c"  # Replace with your actual Render URL
     )
 else:
     app.run_polling()
