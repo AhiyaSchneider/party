@@ -6,7 +6,7 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
 # Load bot token
-TOKEN = "7658676457:AAEDrjppt4rhXJ6lNIRqFq8UQf0jmLSMIqY"
+TOKEN = TELEGRAM_BOT_TOKEN
 GROUP_ID = -1002253157550  # Replace with your group chat ID
 
 os.makedirs("qrcodes", exist_ok=True)
