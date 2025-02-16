@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 import qrcode
+import traceback  # Import to capture full error details
 from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
@@ -23,7 +24,7 @@ def index():
     return "✅ Bot is running!", 200  # Test if Flask is working
 
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
-import traceback  # Import to capture full error details
+
 
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
 async def webhook():
