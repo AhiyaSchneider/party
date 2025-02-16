@@ -8,29 +8,32 @@ from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-# Load bot token
+# ✅ Load bot token
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROUP_ID = -1002253157550  # Replace with your group chat ID
 
 os.makedirs("qrcodes", exist_ok=True)
 GUESTS_FILE = "guests.json"
 
-# ✅ Initialize Flask and Telegram bot at startup
+# ✅ Initialize Flask app
 flask_app = Flask(__name__)
-app = Application.builder().token(TOKEN).build()
+
+# ✅ Ensure single event loop & correct async execution
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 async def initialize_bot():
     """Ensures the bot is properly initialized before handling updates."""
-    print("⚡ Initializing Telegram bot...")
+    global app  # Declare as global to prevent re-initialization issues
+    app = Application.builder().token(TOKEN).build()
     await app.initialize()
     print("✅ Telegram bot initialized!")
 
-# ✅ Run bot initialization **correctly**
-asyncio.run(initialize_bot())
+loop.run_until_complete(initialize_bot())  # ✅ Properly initialize before Flask starts
 
 @flask_app.route("/", methods=["GET"])
 def index():
-    return "✅ Bot is running!", 200  # Test if Flask is working
+    return "✅ Bot is running!", 200  # ✅ Flask working test
 
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
 async def webhook():
@@ -49,8 +52,7 @@ async def webhook():
 
                 telegram_update = Update.de_json(update, app.bot)
 
-                loop = asyncio.get_event_loop()
-                loop.create_task(app.process_update(telegram_update))  # ✅ Correct async processing
+                await app.process_update(telegram_update)  # ✅ Direct async processing
 
             except KeyError as e:
                 print(f"❌ ERROR: Missing expected key: {e}")
@@ -145,6 +147,6 @@ if "PORT" in os.environ:
     flask_app.run(host="0.0.0.0", port=PORT)  # ✅ Production Flask server
 else:
     print("🔄 Running Polling mode...")
-    app.run_polling()
+    loop.run_until_complete(app.run_polling())
 
 print("✅ Bot is running...")  # Should appear in Render logs
