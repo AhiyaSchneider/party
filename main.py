@@ -63,10 +63,14 @@ async def save_guest_to_group(name):
     await app.bot.send_message(chat_id=GROUP_ID, text=message)
 
 async def start(update: Update, context: CallbackContext):
+    print(f"🚀 /start command received from user: {update.message.chat.id}")  # ✅ Log user ID
+
     keyboard = [[KeyboardButton("➕ Add Guest")], [KeyboardButton("📋 Show Guests")]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
     await update.message.reply_text("Welcome to Guest Manager!", reply_markup=reply_markup)
 
+    print("✅ Sent start message successfully!")  # ✅ Log response
 async def handle_message(update: Update, context: CallbackContext):
     text = update.message.text.strip()
 
@@ -93,6 +97,7 @@ async def handle_message(update: Update, context: CallbackContext):
         await update.message.reply_text("❌ Invalid option.")
 
 app.add_handler(CommandHandler("start", start))
+print("✅ Command handlers registered!")
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("🟢 Bot is initializing...")  # Debugging message
