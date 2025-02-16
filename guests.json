@@ -1,0 +1,10 @@
+{
+  "achia schnider": {
+    "qr_file": "qrcodes/achia_schnider.png",
+    "checked_in": false
+  },
+  "aa": {
+    "qr_file": "qrcodes/aa.png",
+    "checked_in": false
+  }
+}
