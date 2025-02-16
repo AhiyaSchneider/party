@@ -1,5 +1,6 @@
 python-telegram-bot
 python-telegram-bot[webhooks]
+flask
 qrcode
 pillow
 pandas
