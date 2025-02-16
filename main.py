@@ -26,6 +26,7 @@ def index():
 def webhook():
     """Handles incoming Telegram updates"""
     update = request.get_json()
+    print("🟢 Incoming Webhook Request!")
     if update:
         print(f"🔹 Received update: {update}")  # ✅ Debugging
         asyncio.run(app.update_queue.put(Update.de_json(update, app.bot)))  # ✅ Properly await async function
