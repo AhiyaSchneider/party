@@ -21,17 +21,15 @@ flask_app = Flask(__name__)
 def index():
     return "✅ Bot is running!", 200  # Test if Flask is working
 
-import asyncio  # ✅ Import asyncio for async support
-
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
-async def webhook():
+def webhook():
     """Handles incoming Telegram updates"""
     update = request.get_json()
     if update:
-        print(f"🔹 1Received update: {update}")  # Debugging
-        await app.update_queue.put(Update.de_json(update, app.bot))  # ✅ Added await
+        print(f"🔹 Received update: {update}")  # ✅ Debugging
+        app.update_queue.put(Update.de_json(update, app.bot))  # ✅ Removed await
+    print(f"✅ Webhook Response: OK")  # ✅ Debugging print to verify requests
     return "OK", 200
-
 
 def load_guest_list():
     if os.path.exists(GUESTS_FILE):
@@ -103,7 +101,7 @@ print("🟢 Bot is initializing...")  # Debugging message
 if "PORT" in os.environ:  # Render requires a port
     PORT = int(os.getenv("PORT", 8443))
     print(f"🌍 Running Webhook on port {PORT}...")
-    flask_app.run(host="0.0.0.0", port=PORT)
+    flask_app.run(host="0.0.0.0", port=PORT)  # ✅ Running production server via Gunicorn
 else:
     print("🔄 Running Polling mode...")
     app.run_polling()

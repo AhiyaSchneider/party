@@ -3,6 +3,7 @@ python-telegram-bot[webhooks]
 flask
 flask[async]
 qrcode
+gunicorn
 pillow
 pandas
 openpyxl
