@@ -29,8 +29,9 @@ def webhook():
     update = request.get_json()
 
     if update:
-        print(f"🔹 Received update: {update}")  # ✅ Debugging
+        print(f"🔹 Received update: {update}")  # ✅ Debugging        
         asyncio.run(app.update_queue.put(Update.de_json(update, app.bot)))  # ✅ Properly await async function
+        return "OK", 201
     print(f"✅ Webhook Response: OK")  # ✅ Debugging print to verify requests
     return "OK", 200
 
