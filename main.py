@@ -23,17 +23,40 @@ def index():
     return "✅ Bot is running!", 200  # Test if Flask is working
 
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
+import traceback  # Import to capture full error details
+
+@flask_app.route(f"/{TOKEN}", methods=["POST"])
+async def webhook():
     """Handles incoming Telegram updates"""
     print("🟢 Incoming Webhook Request!")
-    update = request.get_json()
 
-    if update:
-        print(f"🔹 Received update: {update}")  # ✅ Debugging        
-        asyncio.run(app.update_queue.put(Update.de_json(update, app.bot)))  # ✅ Properly await async function
-        return "OK", 201
-    print(f"✅ Webhook Response: OK")  # ✅ Debugging print to verify requests
-    return "OK", 200
+    try:
+        update = request.get_json()
+        print(f"🔹 DEBUG: Full update from Telegram:\n{json.dumps(update, indent=2)}")  # ✅ Log raw data
+
+        if update:
+            try:
+                # Ensure "message" exists before processing
+                if "message" not in update:
+                    print("⚠️ WARNING: Received update without 'message' field.")
+                    return "No message field", 200
+
+                telegram_update = Update.de_json(update, app.bot)
+                loop = asyncio.get_event_loop()
+                loop.create_task(app.process_update(telegram_update))  # ✅ Correct async processing
+
+            except KeyError as e:
+                print(f"❌ ERROR: Missing expected key: {e}")
+                print(traceback.format_exc())  # ✅ Print full error traceback for debugging
+                return "Internal Server Error", 500
+
+        print("✅ Webhook Processed Update Successfully!")
+        return "OK", 200
+
+    except Exception as e:
+        print(f"❌ ERROR: {e}")
+        print(traceback.format_exc())  # ✅ Print full error traceback
+        return "Internal Server Error", 500
 
 def load_guest_list():
     if os.path.exists(GUESTS_FILE):
