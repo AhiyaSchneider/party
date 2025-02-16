@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 import qrcode
+from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
@@ -11,6 +12,18 @@ GROUP_ID = -1002253157550  # Replace with your group chat ID
 
 os.makedirs("qrcodes", exist_ok=True)
 GUESTS_FILE = "guests.json"
+
+# Initialize bot and Flask app
+app = Application.builder().token(TOKEN).build()
+flask_app = Flask(__name__)
+
+@flask_app.route(f"/{TOKEN}", methods=["POST"])
+def webhook():
+    """Handles incoming Telegram updates"""
+    update = request.get_json()
+    if update:
+        app.update_queue.put(Update.de_json(update, app.bot))
+    return "OK", 200
 
 def load_guest_list():
     if os.path.exists(GUESTS_FILE):
@@ -73,7 +86,8 @@ async def handle_message(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text("❌ Invalid option.")
 
-app = Application.builder().token(TOKEN).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("🟢 Bot is initializing...")  # Debugging message
 
@@ -81,13 +95,7 @@ print("🟢 Bot is initializing...")  # Debugging message
 if "PORT" in os.environ:  # Render requires a port
     PORT = int(os.getenv("PORT", 8443))
     print(f"🌍 Running Webhook on port {PORT}...")
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        url_path=TOKEN,
-        webhook_url=f"https://party-0m9d.onrender.com/{TOKEN}"  # ✅ Correct Webhook URL
-    )
-    print(f"🌍 finish Webhook on port {PORT}...")
+    flask_app.run(host="0.0.0.0", port=PORT)
 else:
     print("🔄 Running Polling mode...")
     app.run_polling()
