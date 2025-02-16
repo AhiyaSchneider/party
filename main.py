@@ -17,11 +17,16 @@ GUESTS_FILE = "guests.json"
 app = Application.builder().token(TOKEN).build()
 flask_app = Flask(__name__)
 
+@flask_app.route("/", methods=["GET"])
+def index():
+    return "✅ Bot is running!", 200  # Test if Flask is working
+
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     """Handles incoming Telegram updates"""
     update = request.get_json()
     if update:
+        print(f"🔹 Received update: {update}")  # Debugging
         app.update_queue.put(Update.de_json(update, app.bot))
     return "OK", 200
 
