@@ -21,14 +21,17 @@ flask_app = Flask(__name__)
 def index():
     return "✅ Bot is running!", 200  # Test if Flask is working
 
+import asyncio  # ✅ Import asyncio for async support
+
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
+async def webhook():
     """Handles incoming Telegram updates"""
     update = request.get_json()
     if update:
-        print(f"🔹 Received update: {update}")  # Debugging
-        app.update_queue.put(Update.de_json(update, app.bot))
+        print(f"🔹 1Received update: {update}")  # Debugging
+        await app.update_queue.put(Update.de_json(update, app.bot))  # ✅ Added await
     return "OK", 200
+
 
 def load_guest_list():
     if os.path.exists(GUESTS_FILE):
