@@ -19,14 +19,14 @@ GUESTS_FILE = "guests.json"
 flask_app = Flask(__name__)
 app = Application.builder().token(TOKEN).build()
 
-# ✅ Ensure bot is fully initialized
 async def initialize_bot():
+    """Ensures the bot is properly initialized before handling updates."""
     print("⚡ Initializing Telegram bot...")
     await app.initialize()
     print("✅ Telegram bot initialized!")
 
-# ✅ Run bot initialization
-asyncio.create_task(initialize_bot())
+# ✅ Run bot initialization **correctly**
+asyncio.run(initialize_bot())
 
 @flask_app.route("/", methods=["GET"])
 def index():
@@ -43,7 +43,6 @@ async def webhook():
 
         if update:
             try:
-                # Ensure "message" exists before processing
                 if "message" not in update:
                     print("⚠️ WARNING: Received update without 'message' field.")
                     return "No message field", 200
