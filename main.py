@@ -75,16 +75,21 @@ async def handle_message(update: Update, context: CallbackContext):
 
 app = Application.builder().token(TOKEN).build()
 
+print("🟢 Bot is initializing...")  # Debugging message
+
 # Detect if running on Render and adjust mode accordingly
 if "PORT" in os.environ:  # Render requires a port
     PORT = int(os.getenv("PORT", 8443))
+    print(f"🌍 Running Webhook on port {PORT}...")
     app.run_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path=TOKEN,
-        webhook_url=f"https://party-0m9d.onrender.com"  # Replace with your actual Render URL
+        webhook_url=f"https://party-0m9d.onrender.com/{TOKEN}"  # ✅ Correct Webhook URL
     )
+    print(f"🌍 finish Webhook on port {PORT}...")
 else:
+    print("🔄 Running Polling mode...")
     app.run_polling()
 
-print("✅ Bot is running...")
+print("✅ Bot is running...")  # Should appear in Render logs
