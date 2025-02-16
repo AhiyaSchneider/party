@@ -2,11 +2,11 @@ import os
 import json
 import pandas as pd
 import qrcode
-import traceback  # Import to capture full error details
+import traceback
+import asyncio
 from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-import asyncio 
 
 # Load bot token
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -15,16 +15,22 @@ GROUP_ID = -1002253157550  # Replace with your group chat ID
 os.makedirs("qrcodes", exist_ok=True)
 GUESTS_FILE = "guests.json"
 
-# Initialize bot and Flask app
-app = Application.builder().token(TOKEN).build()
+# ✅ Initialize Flask and Telegram bot at startup
 flask_app = Flask(__name__)
+app = Application.builder().token(TOKEN).build()
+
+# ✅ Ensure bot is fully initialized
+async def initialize_bot():
+    print("⚡ Initializing Telegram bot...")
+    await app.initialize()
+    print("✅ Telegram bot initialized!")
+
+# ✅ Run bot initialization
+asyncio.create_task(initialize_bot())
 
 @flask_app.route("/", methods=["GET"])
 def index():
     return "✅ Bot is running!", 200  # Test if Flask is working
-
-@flask_app.route(f"/{TOKEN}", methods=["POST"])
-
 
 @flask_app.route(f"/{TOKEN}", methods=["POST"])
 async def webhook():
@@ -43,6 +49,7 @@ async def webhook():
                     return "No message field", 200
 
                 telegram_update = Update.de_json(update, app.bot)
+
                 loop = asyncio.get_event_loop()
                 loop.create_task(app.process_update(telegram_update))  # ✅ Correct async processing
 
@@ -99,6 +106,7 @@ async def start(update: Update, context: CallbackContext):
     await update.message.reply_text("Welcome to Guest Manager!", reply_markup=reply_markup)
 
     print("✅ Sent start message successfully!")  # ✅ Log response
+
 async def handle_message(update: Update, context: CallbackContext):
     text = update.message.text.strip()
 
@@ -124,17 +132,18 @@ async def handle_message(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text("❌ Invalid option.")
 
+# ✅ Register handlers only after bot is initialized
 app.add_handler(CommandHandler("start", start))
 print("✅ Command handlers registered!")
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 print("🟢 Bot is initializing...")  # Debugging message
 
-# Detect if running on Render and adjust mode accordingly
-if "PORT" in os.environ:  # Render requires a port
+# ✅ Run Flask app (Webhook Mode)
+if "PORT" in os.environ:  
     PORT = int(os.getenv("PORT", 8443))
     print(f"🌍 Running Webhook on port {PORT}...")
-    flask_app.run(host="0.0.0.0", port=PORT)  # ✅ Running production server via Gunicorn
+    flask_app.run(host="0.0.0.0", port=PORT)  # ✅ Production Flask server
 else:
     print("🔄 Running Polling mode...")
     app.run_polling()
