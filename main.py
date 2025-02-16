@@ -5,6 +5,7 @@ import qrcode
 from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+import asyncio 
 
 # Load bot token
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -27,7 +28,7 @@ def webhook():
     update = request.get_json()
     if update:
         print(f"🔹 Received update: {update}")  # ✅ Debugging
-        app.update_queue.put(Update.de_json(update, app.bot))  # ✅ Removed await
+        asyncio.run(app.update_queue.put(Update.de_json(update, app.bot)))  # ✅ Properly await async function
     print(f"✅ Webhook Response: OK")  # ✅ Debugging print to verify requests
     return "OK", 200
 
