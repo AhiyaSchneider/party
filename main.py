@@ -6,7 +6,6 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
 # Load bot token
-import os
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROUP_ID = -1002253157550  # Replace with your group chat ID
 
@@ -75,8 +74,17 @@ async def handle_message(update: Update, context: CallbackContext):
         await update.message.reply_text("❌ Invalid option.")
 
 app = Application.builder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+# Detect if running on Render and adjust mode accordingly
+if "PORT" in os.environ:  # Render requires a port
+    PORT = int(os.getenv("PORT", 8443))
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url=f"https://your-render-url.com/{TOKEN}"  # Replace with your actual Render URL
+    )
+else:
+    app.run_polling()
 
 print("✅ Bot is running...")
-app.run_polling()
